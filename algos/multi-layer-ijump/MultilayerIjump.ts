@@ -489,14 +489,21 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
             })
           }
         }
-        if (travelDir.wallDistance === Infinity) {
+        if (
+          travelDir.wallDistance === Infinity &&
+          isGoalInTravelDir &&
+          goalDistAlongTravelDir > 0
+        ) {
           travelDirs3.push({
             ...travelDir,
             travelDistance: goalDistAlongTravelDir,
             enterMarginCost: 0,
             travelMarginCostFactor: 1,
           })
-        } else if (travelDir.wallDistance > this.largestMargin) {
+        } else if (
+          travelDir.wallDistance !== Infinity &&
+          travelDir.wallDistance > this.largestMargin
+        ) {
           for (const { margin, enterCost, travelCostFactor } of this
             .marginsWithCosts) {
             if (travelDir.wallDistance > this.largestMargin + margin) {
@@ -524,13 +531,23 @@ export class MultilayerIjump extends GeneralizedAstarAutorouter {
       }
     }
 
-    return travelDirs3.map((dir) => ({
-      x: node.x + dir.dx * dir.travelDistance,
-      y: node.y + dir.dy * dir.travelDistance,
-      l: node.l + dir.dl,
-      obstacleHit: dir.obstacle,
-      travelMarginCostFactor: dir.travelMarginCostFactor,
-      enterMarginCost: dir.enterMarginCost,
-    }))
+    return travelDirs3
+      .filter((dir) => dir.travelDistance >= 0)
+      .filter((dir) => {
+        if (dir.dl !== 0) return true
+        return !obstacles.isObstacleAt(
+          node.x + dir.dx * dir.travelDistance,
+          node.y + dir.dy * dir.travelDistance,
+          node.l + dir.dl,
+        )
+      })
+      .map((dir) => ({
+        x: node.x + dir.dx * dir.travelDistance,
+        y: node.y + dir.dy * dir.travelDistance,
+        l: node.l + dir.dl,
+        obstacleHit: dir.obstacle,
+        travelMarginCostFactor: dir.travelMarginCostFactor,
+        enterMarginCost: dir.enterMarginCost,
+      }))
   }
 }

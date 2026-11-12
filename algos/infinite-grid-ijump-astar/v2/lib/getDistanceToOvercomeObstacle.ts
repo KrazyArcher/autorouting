@@ -22,7 +22,7 @@ export function getDistanceToOvercomeObstacle({
   SHOULD_DETECT_CONJOINED_OBSTACLES = false,
   MAX_CONJOINED_OBSTACLES = 20,
 }: {
-  node: { x: number; y: number }
+  node: { x: number; y: number; l?: number }
   travelDir: DirectionWithWallDistance
   wallDir: DirectionWithWallDistance
   obstacle: Obstacle
@@ -60,13 +60,14 @@ export function getDistanceToOvercomeObstacle({
     // http://localhost:3080/problem/traces/18#t2_iter[14] is a great example
     // of a path being too close because of a bad distToOvercomeObstacle b/c
     // of missing detection of obstacles within the wallDistance
-    const obstacleAtEnd = obstacles.getObstacleAt(
+    const obstacleAtEnd = (obstacles as any).getObstacleAt(
       node.x +
         travelDir.dx * distToOvercomeObstacle +
         wallDir.dx * (wallDir.wallDistance + 0.001),
       node.y +
         travelDir.dy * distToOvercomeObstacle +
         wallDir.dy * (wallDir.wallDistance + 0.001),
+      node.l,
     )
     // const obstaclesAtEnd = obstacles.getObstaclesOverlappingRegion({
     //   minX: node.x + travelDir.dx * distToOvercomeObstacle,
@@ -112,6 +113,7 @@ export function getDistanceToOvercomeObstacle({
         node: {
           x: node.x + travelDir.dx * distToOvercomeObstacle,
           y: node.y + travelDir.dy * distToOvercomeObstacle,
+          l: node.l,
         },
         travelDir: travelDir,
         wallDir: wallDir,
